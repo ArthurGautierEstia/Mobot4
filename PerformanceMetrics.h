@@ -2,22 +2,24 @@
 #ifndef PERFORMANCEMETRICS_H
 #define PERFORMANCEMETRICS_H
 
+#include <QString>
 #include <QtGlobal>
 
 /**
- * @brief M�triques de performance d'un syst�me de mesure
+ * @brief Métriques de performance instantanées d'un système de mesure
+ *
+ * Émis à chaque frame via le signal performanceUpdate().
+ * Contient uniquement des valeurs instantanées — pas de statistiques.
+ * Les statistiques de session complètes sont dans AcquisitionSummary,
+ * émis une seule fois en fin d'acquisition.
  */
 struct PerformanceMetrics {
-    double averageLatency = 0.0;      // Latence moyenne en ms
-    double maxLatency = 0.0;          // Latence max en ms
-    double minLatency = 0.0;          // Latence min en ms
-    double jitter = 0.0;              // Jitter (�cart-type) en ms
-    double actualFrequency = 0.0;     // Fr�quence r�elle mesur�e en Hz
-    quint64 totalFrames = 0;          // Nombre total de frames re�ues
-    quint64 droppedFrames = 0;        // Frames perdues
-    quint64 bufferOverruns = 0;       // D�passements de buffer
+    QString systemName    = "";    // Nom du système source (routing UI multi-systèmes)
+    double  frequencyHz   = 0.0;   // Fréquence instantanée mesurée (Hz)
+    double  latencyMs     = 0.0;   // Latence instantanée (ms) — 0.0 si indisponible
+    quint64 frameCount    = 0;     // Frames reçues depuis startAcquisition()
+    quint64 droppedFrames = 0;     // Frames manquantes détectées
 
-    // Constructeur par d�faut
     PerformanceMetrics() = default;
 };
 
