@@ -6,174 +6,152 @@
 #include <QThread>
 #include <QMutex>
 #include <atomic>
+#include <limits>
 #include "MeasurementFrame.h"
 #include "SystemCapabilities.h"
 #include "ConnectionConfig.h"
 #include "PerformanceMetrics.h"
+#include "AcquisitionSummary.h"
 #include "CircularBuffer.h"
 
 /**
- * @brief Interface abstraite pour tous les systèmes de mesure
+ * @brief Interface abstraite pour tous les systÃ¨mes de mesure
  *
- * Chaque système (OptiTrack, Vicon, Qualisys, RSI) doit hériter de cette classe
- * et implémenter toutes les méthodes virtuelles pures.
+ * Chaque systÃ¨me (OptiTrack, Vicon, Qualisys) doit hÃ©riter de cette classe
+ * et implÃ©menter toutes les mÃ©thodes virtuelles pures.
+ *
+ * Gestion des statistiques de session :
+ *   - Appeler resetSessionStats() dans startAcquisition()
+ *   - Appeler updateRunningStats() Ã  chaque frame reÃ§ue
+ *   - Appeler buildSummary() dans stopAcquisition() puis emit acquisitionCompleted()
  */
 class IMeasurementSystem : public QObject {
     Q_OBJECT
 
 public:
     /**
-     * @brief Modèle de threading du système
+     * @brief ModÃ¨le de threading du systÃ¨me
      */
     enum class ThreadingModel {
-        SdkManaged,           // Le SDK gère le thread (ex: OptiTrack callback)
-        ApplicationManaged    // L'application crée un thread (ex: Vicon, Qualisys, RSI)
+        SdkManaged,           // Le SDK gÃ¨re le thread (ex: OptiTrack callback)
+        ApplicationManaged    // L'application crÃ©e un thread (ex: Vicon, Qualisys)
     };
 
     virtual ~IMeasurementSystem();
 
     // ========== Cycle de vie ==========
 
-    /**
-     * @brief Initialise le système (charge SDK, etc.)
-     * @return true si succès
-     */
     virtual bool initialize() = 0;
-
-    /**
-     * @brief Connecte au système avec la configuration donnée
-     * @param config Configuration de connexion
-     * @return true si succès
-     */
     virtual bool connect(const ConnectionConfig& config) = 0;
-
-    /**
-     * @brief Déconnecte du système
-     * @return true si succès
-     */
     virtual bool disconnect() = 0;
-
-    /**
-     * @brief Vérifie si le système est connecté
-     */
     virtual bool isConnected() const = 0;
 
     // ========== Acquisition ==========
 
-    /**
-     * @brief Démarre l'acquisition de données
-     * @return true si succès
-     */
     virtual bool startAcquisition() = 0;
-
-    /**
-     * @brief Arrête l'acquisition de données
-     * @return true si succès
-     */
     virtual bool stopAcquisition() = 0;
-
-    /**
-     * @brief Vérifie si l'acquisition est en cours
-     */
     virtual bool isAcquiring() const = 0;
 
-    // ========== Données ==========
+    // ========== DonnÃ©es ==========
 
-    /**
-     * @brief Récupère la dernière frame mesurée (thread-safe)
-     */
     virtual MeasurementFrame getLatestFrame() const = 0;
-
-    /**
-     * @brief Fréquence native actuelle du système en Hz
-     */
     virtual double getNativeFrequency() const = 0;
 
     /**
      * @brief Retourne la meilleure estimation de latence disponible (ms)
-     * Chaque système implémente la méthode la plus précise possible.
+     * Chaque systÃ¨me implÃ©mente la mÃ©thode la plus prÃ©cise possible.
+     * Retourne 0.0 si le protocole ne permet pas de la mesurer.
      */
     virtual double getLatency() const = 0;
 
-
-    /**
-     * @brief Liste des objets/rigid bodies disponibles
-     */
     virtual QStringList getAvailableObjects() const = 0;
 
-    // ========== Capacités ==========
+    // ========== CapacitÃ©s ==========
 
-    /**
-     * @brief Récupère les capacités du système
-     */
     virtual SystemCapabilities getCapabilities() const = 0;
-
-    /**
-     * @brief Nom du système (ex: "OptiTrack", "Vicon")
-     */
     virtual QString getSystemName() const = 0;
-
-    /**
-     * @brief Version du SDK
-     */
     virtual QString getSystemVersion() const = 0;
-
-    /**
-     * @brief Modèle de threading utilisé par ce système
-     */
     virtual ThreadingModel getThreadingModel() const = 0;
 
 signals:
-    /**
-     * @brief Émis lors de la connexion réussie
-     */
     void connected();
-
-    /**
-     * @brief Émis lors de la déconnexion
-     */
     void disconnected();
-
-    /**
-     * @brief Émis à chaque nouvelle frame disponible
-     */
     void newFrameAvailable(const MeasurementFrame& frame);
-
-    /**
-     * @brief Émis en cas d'erreur
-     */
     void errorOccurred(const QString& error);
-
-    /**
-     * @brief Émis pour les messages de log
-     */
     void logMessage(const QString& message);
 
-    /**
-     * @brief Émis périodiquement avec les métriques de performance
-     */
+    /** @brief Ã‰mis Ã  chaque frame avec les mÃ©triques instantanÃ©es */
     void performanceUpdate(const PerformanceMetrics& metrics);
 
+    /** @brief Ã‰mis une seule fois Ã  l'arrÃªt de l'acquisition */
+    void acquisitionCompleted(const AcquisitionSummary& summary);
+
 protected:
-    // Constructeur protégé (classe abstraite)
-    IMeasurementSystem(QObject* parent = nullptr);
+    explicit IMeasurementSystem(QObject* parent = nullptr);
 
-    
+    // =========================================================================
+    // Gestion des statistiques de session
+    // =========================================================================
 
-    // ========== Membres protégés ==========
+    /**
+     * @brief RÃ©initialise tous les accumulateurs de session.
+     *        Ã€ appeler au dÃ©but de startAcquisition().
+     */
+    void resetSessionStats();
 
-    SystemCapabilities m_capabilities;      // Capacités du système
-    std::atomic<bool> m_isAcquiring;       // Flag d'acquisition
-    QThread* m_acquisitionThread;          // Thread d'acquisition (si ApplicationManaged)
+    /**
+     * @brief Met Ã  jour m_metrics (valeurs live) et accumule pour le rÃ©sumÃ© final.
+     *        Ã€ appeler Ã  chaque frame dans la boucle d'acquisition.
+     *
+     * @param latencyMs    Latence instantanÃ©e (ms). IgnorÃ©e si latencyKnown = false.
+     * @param freqHz       FrÃ©quence instantanÃ©e mesurÃ©e (Hz).
+     * @param latencyKnown true si le systÃ¨me peut mesurer la latence (false = Qualisys).
+     */
+    void updateRunningStats(double latencyMs, double freqHz, bool latencyKnown = true);
 
-    mutable QMutex m_frameMutex;           // Mutex pour accès thread-safe à m_latestFrame
-    MeasurementFrame m_latestFrame;        // Dernière frame reçue
+    /**
+     * @brief Construit l'AcquisitionSummary Ã  partir des accumulateurs.
+     *        Ã€ appeler dans stopAcquisition() avant emit acquisitionCompleted().
+     *
+     * @param objectName Nom de l'objet trackÃ© (pour renseigner summary.objectName).
+     */
+    AcquisitionSummary buildSummary(const QString& objectName = QString()) const;
 
-    CircularBuffer<MeasurementFrame, 100> m_frameBuffer;  // Buffer circulaire
+    // =========================================================================
+    // Membres protÃ©gÃ©s
+    // =========================================================================
 
-    PerformanceMetrics m_metrics;          // Métriques de performance
-    qint64 m_lastFrameTimestamp;          // Timestamp de la dernière frame (pour calculs)
+    SystemCapabilities m_capabilities;
+    std::atomic<bool>  m_isAcquiring;
+    QThread*           m_acquisitionThread;
+
+    mutable QMutex   m_frameMutex;
+    MeasurementFrame m_latestFrame;
+
+    CircularBuffer<MeasurementFrame, 100> m_frameBuffer;
+
+    PerformanceMetrics m_metrics;           // MÃ©triques live (frame courante)
+    qint64             m_lastFrameTimestamp;
+
+private:
+    // =========================================================================
+    // Accumulateurs de session (privÃ©s, manipulÃ©s via les mÃ©thodes protÃ©gÃ©es)
+    // =========================================================================
+
+    qint64  m_sessionStartTimestamp = 0;
+
+    // FrÃ©quence
+    double  m_freqSum   = 0.0;
+    double  m_freqMin   = std::numeric_limits<double>::max();
+    double  m_freqMax   = 0.0;
+    quint64 m_freqCount = 0;
+
+    // Latence
+    bool    m_latencyKnown = false;
+    double  m_latencySum   = 0.0;
+    double  m_latencyMin   = std::numeric_limits<double>::max();
+    double  m_latencyMax   = 0.0;
+    quint64 m_latencyCount = 0;
 };
 
 #endif // IMEASUREMENTSYSTEM_H
-
