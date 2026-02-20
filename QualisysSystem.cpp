@@ -1,4 +1,4 @@
-﻿#include "QualisysSystem.h"
+#include "QualisysSystem.h"
 #include <QDebug>
 #include <cmath>
 
@@ -24,14 +24,14 @@ QualisysSystem::~QualisysSystem()
 
 void QualisysSystem::initializeCapabilities()
 {
-    m_capabilities.systemName = "Qualisys";
-    m_capabilities.version = "QTM RT 1.19+";
-    m_capabilities.maxNativeFrequency = 2000.0; // Qualisys jusqu'à 2000 Hz
-    m_capabilities.minNativeFrequency = 1.0;
-    m_capabilities.supportsVariableRate = true;   // Fréquence fixée dans QTM
-    m_capabilities.supportsQuaternions = false;  // 6DEuler → Euler uniquement
+    m_capabilities.systemName           = "Qualisys";
+    m_capabilities.version              = "QTM RT 1.19+";
+    m_capabilities.maxNativeFrequency   = 2000.0; // Qualisys jusqu'à 2000 Hz
+    m_capabilities.minNativeFrequency   = 1.0;
+    m_capabilities.supportsVariableRate    = true;  // Fréquence fixée dans QTM
+    m_capabilities.supportsQuaternions     = false; // 6DEuler → Euler uniquement
     m_capabilities.supportsMultipleObjects = true;
-    m_capabilities.typicalLatency = 5.0;    // ~5ms typique
+    m_capabilities.typicalLatency          = 5.0;   // ~5ms typique
 }
 
 // ========== Cycle de vie ==========
@@ -68,8 +68,6 @@ bool QualisysSystem::connect(const ConnectionConfig& config)
     emit logMessage(QString("Connecting to QTM: %1:%2")
         .arg(config.serverAddress).arg(port));
 
-    // Connexion TCP au serveur QTM RT
-    // udpServerPort = 0 → pas d'UDP pour les commandes (UDP pour les données seulement)
     unsigned short udpServerPort = 0;
     if (!m_rtProtocol->Connect(
         config.serverAddress.toStdString().c_str(),
@@ -84,7 +82,7 @@ bool QualisysSystem::connect(const ConnectionConfig& config)
         return false;
     }
 
-    // ✅ Récupérer la liste des corps 6DOF (GetParameters 6D)
+    // ✅ Récupérer la liste des corps 6DOF
     bool dataAvailable = false;
     if (!m_rtProtocol->Read6DOFSettings(dataAvailable)) {
         emit logMessage("Warning: Could not read 6DOF settings");
@@ -96,28 +94,22 @@ bool QualisysSystem::connect(const ConnectionConfig& config)
             m_bodyNames << QString::fromUtf8(m_rtProtocol->Get6DOFBodyName(i));
         }
         emit logMessage(QString("Found %1 6DOF body/bodies: %2")
-            .arg(nBodies)
-            .arg(m_bodyNames.join(", ")));
+            .arg(nBodies).arg(m_bodyNames.join(", ")));
     }
 
-    // Trouver le corps cible
-    m_targetBodyName = config.objectName;
+    m_targetBodyName  = config.objectName;
     m_targetBodyIndex = findBodyIndex(config.objectName);
 
     if (m_targetBodyIndex < 0 && !m_bodyNames.isEmpty()) {
-        // Fallback : premier corps disponible
         m_targetBodyIndex = 0;
-        m_targetBodyName = m_bodyNames.first();
+        m_targetBodyName  = m_bodyNames.first();
         emit logMessage(QString("Body '%1' not found, using first: '%2'")
-            .arg(config.objectName)
-            .arg(m_targetBodyName));
+            .arg(config.objectName).arg(m_targetBodyName));
     }
 
     m_isConnected = true;
     emit connected();
-    emit logMessage(QString("Qualisys connected. Tracking: '%1'")
-        .arg(m_targetBodyName));
-
+    emit logMessage(QString("Qualisys connected. Tracking: '%1'").arg(m_targetBodyName));
     return true;
 }
 
@@ -126,19 +118,12 @@ bool QualisysSystem::disconnect()
     if (!m_isConnected) return true;
 
     emit logMessage("Disconnecting from Qualisys...");
-
-    if (m_isAcquiring) {
-        stopAcquisition();
-    }
-
-    if (m_rtProtocol) {
-        m_rtProtocol->Disconnect();
-    }
+    if (m_isAcquiring)  stopAcquisition();
+    if (m_rtProtocol)   m_rtProtocol->Disconnect();
 
     m_isConnected = false;
     emit disconnected();
     emit logMessage("Qualisys disconnected");
-
     return true;
 }
 
@@ -155,24 +140,20 @@ bool QualisysSystem::startAcquisition()
         emit errorOccurred("Cannot start acquisition: not connected");
         return false;
     }
-
     if (m_isAcquiring) {
         emit logMessage("Acquisition already running");
         return true;
     }
 
     // ✅ Démarrer le streaming 6DEuler depuis QTM
-    // AllFrames = toutes les frames temps-réel calculées par QTM
-    // cComponent6dEuler = position (mm) + angles Euler (degrés, convention QTM)
     const unsigned short udpPort = m_qualisysConfig.useUDP
         ? m_qualisysConfig.udpPort : 0;
 
-
     if (!m_rtProtocol->StreamFrames(
         CRTProtocol::EStreamRate::RateAllFrames,
-        0,           // nRateArg ignoré pour AllFrames
+        0,
         udpPort,
-        nullptr,     // Adresse UDP = IP du client (auto)
+        nullptr,
         CRTProtocol::cComponent6dEuler))
     {
         emit errorOccurred(QString("Failed to start streaming: %1")
@@ -180,11 +161,13 @@ bool QualisysSystem::startAcquisition()
         return false;
     }
 
-    m_isAcquiring = true;
-    m_lastFrameTime = 0;
+    // ✅ Réinitialiser les statistiques de session
+    resetSessionStats();
+
+    m_isAcquiring     = true;
+    m_lastFrameTime   = 0;
     m_lastFrameNumber = 0;
 
-    // ✅ Thread d'acquisition via QThread::create (Qt 5.10+)
     m_acquisitionThread = QThread::create([this]() { acquisitionLoop(); });
     m_acquisitionThread->start();
 
@@ -197,13 +180,9 @@ bool QualisysSystem::stopAcquisition()
     if (!m_isAcquiring) return true;
 
     emit logMessage("Stopping Qualisys acquisition...");
-
     m_isAcquiring = false; // Signal au thread de s'arrêter
 
-    // Envoie "StreamFrames Stop" au serveur QTM
-    if (m_rtProtocol) {
-        m_rtProtocol->StreamFramesStop();
-    }
+    if (m_rtProtocol) m_rtProtocol->StreamFramesStop();
 
     // Attendre la fin propre du thread
     if (m_acquisitionThread) {
@@ -211,6 +190,10 @@ bool QualisysSystem::stopAcquisition()
         delete m_acquisitionThread;
         m_acquisitionThread = nullptr;
     }
+
+    // ✅ Émettre le résumé de session (après la fin du thread → compteurs finaux)
+    AcquisitionSummary summary = buildSummary(m_targetBodyName);
+    emit acquisitionCompleted(summary);
 
     emit logMessage("Qualisys acquisition stopped");
     return true;
@@ -229,39 +212,30 @@ void QualisysSystem::acquisitionLoop()
 
     while (m_isAcquiring.load()) {
         CRTPacket::EPacketType packetType;
-
         const int timeoutMs = computeReceiveTimeoutMs();
 
-        // ✅ bSkipEvents = false : on gère tous les types de paquets
         auto response = m_rtProtocol->Receive(packetType, false, timeoutMs);
 
         if (!m_isAcquiring.load()) break;
 
-        // ✅ CNetwork::ResponseType (pas CRTProtocol::)
-        if (response == CNetwork::ResponseType::timeout) {
-            continue;
-        }
+        if (response == CNetwork::ResponseType::timeout) continue;
 
         if (response != CNetwork::ResponseType::success) {
             emit logMessage("Qualisys: receive error, retrying...");
             continue;
         }
 
-        // ✅ PacketNoMoreData = capture QTM arrêtée
         if (packetType == CRTPacket::PacketNoMoreData) {
             emit logMessage("QTM: No more data");
             m_isAcquiring = false;
             break;
         }
 
-        if (packetType != CRTPacket::PacketData) {
-            continue; // Events, commandes → ignorer
-        }
+        if (packetType != CRTPacket::PacketData) continue;
 
         CRTPacket* pPacket = m_rtProtocol->GetRTPacket();
         if (!pPacket) continue;
 
-        // ✅ Count depuis le packet reçu (plus fiable que les settings)
         const unsigned int bodyCount = pPacket->Get6DOFEulerBodyCount();
         if (bodyCount == 0) continue;
 
@@ -279,22 +253,19 @@ void QualisysSystem::acquisitionLoop()
             QMutexLocker locker(&m_frameMutex);
             m_latestFrame = frame;
         }
-
         m_frameBuffer.push(frame);
 
-        // Calcul fréquence
+        // Calcul fréquence instantanée
         const qint64 nowUs = m_timer.nsecsElapsed() / 1000;
         if (m_lastFrameTime > 0) {
             const qint64 delta = nowUs - m_lastFrameTime;
-            if (delta > 0) {
+            if (delta > 0)
                 m_frequency = 1000000.0 / static_cast<double>(delta);
-            }
         }
         m_lastFrameTime = nowUs;
 
-        m_metrics.actualFrequency = m_frequency;
-        m_metrics.latency = m_latency;
-        m_metrics.totalFrames++;
+        // ✅ Qualisys : latence non mesurable via RT protocol → latencyKnown = false
+        updateRunningStats(0.0, m_frequency, false);
 
         emit newFrameAvailable(frame);
         emit performanceUpdate(m_metrics);
@@ -308,17 +279,13 @@ void QualisysSystem::acquisitionLoop()
 MeasurementFrame QualisysSystem::parseFrame(CRTPacket* packet)
 {
     MeasurementFrame frame;
-    frame.systemName = "Qualisys";
-    frame.isValid = false;
+    frame.systemName  = "Qualisys";
+    frame.isValid     = false;
     frame.frameNumber = packet->GetFrameNumber();
-
-    // ✅ Timestamp = µs depuis le début de la capture QTM (doc: Marker Timestamp)
-    frame.timestamp = static_cast<qint64>(packet->GetTimeStamp());
+    frame.timestamp   = static_cast<qint64>(packet->GetTimeStamp());
 
     if (m_targetBodyIndex < 0) return frame;
 
-    // ✅ 6DEuler : X, Y, Z en mm + 3 angles Euler en degrés
-    // Convention des angles définie dans QTM (Workspace Options > Euler tab)
     float x, y, z, ang1, ang2, ang3;
     if (!packet->Get6DOFEulerBody(
         static_cast<unsigned int>(m_targetBodyIndex),
@@ -327,29 +294,20 @@ MeasurementFrame QualisysSystem::parseFrame(CRTPacket* packet)
         return frame;
     }
 
-    // ✅ NaN = corps non visible dans cette frame (doc: IEEE 754 quiet NaN)
-    if (std::isnan(x) || std::isnan(y) || std::isnan(z)) {
-        return frame;
-    }
+    if (std::isnan(x) || std::isnan(y) || std::isnan(z)) return frame;
 
-    frame.isValid = true;
+    frame.isValid    = true;
     frame.objectName = m_targetBodyName;
 
-    // QTM fournit déjà en mm → pas de conversion
-    frame.x = static_cast<double>(x);
-    frame.y = static_cast<double>(y);
-    frame.z = static_cast<double>(z);
-
-    // Angles en degrés (convention QTM, configurable dans l'interface)
+    frame.x  = static_cast<double>(x);
+    frame.y  = static_cast<double>(y);
+    frame.z  = static_cast<double>(z);
     frame.rx = static_cast<double>(ang1);
     frame.ry = static_cast<double>(ang2);
     frame.rz = static_cast<double>(ang3);
 
-    // Qualisys ne fournit pas de quaternion en mode 6DEuler
     frame.quaternion.valid = false;
-
-    // Pas de métrique de qualité en 6DEuler (utiliser 6DEulerRes si besoin du résidu)
-    frame.quality = 1.0;
+    frame.quality          = 1.0;
 
     return frame;
 }
@@ -358,21 +316,16 @@ MeasurementFrame QualisysSystem::parseFrame(CRTPacket* packet)
 
 int QualisysSystem::findBodyIndex(const QString& name) const
 {
-    if (name.isEmpty()) {
-        return m_bodyNames.isEmpty() ? -1 : 0;
-    }
+    if (name.isEmpty()) return m_bodyNames.isEmpty() ? -1 : 0;
     for (int i = 0; i < m_bodyNames.size(); ++i) {
-        if (m_bodyNames[i].compare(name, Qt::CaseInsensitive) == 0) {
+        if (m_bodyNames[i].compare(name, Qt::CaseInsensitive) == 0)
             return i;
-        }
     }
     return -1;
 }
 
 int QualisysSystem::computeReceiveTimeoutMs() const
 {
-    // ✅ Timeout = 2 périodes de frame, borné entre 100ms et 1000ms
-    // N'EST PAS un sleep : c'est le timeout réseau du Receive() bloquant
     if (m_frequency > 1.0) {
         const int twoPeriods = static_cast<int>(2000.0 / m_frequency);
         return qBound(100, twoPeriods, 1000);
@@ -396,35 +349,21 @@ double QualisysSystem::getNativeFrequency() const
 double QualisysSystem::getLatency() const
 {
     // Le protocole QTM RT ne fournit pas de mesure de latence.
-    // Retourne 0.0 : impossible à calculer sans synchronisation d'horloge.
-    return m_latency;
+    return 0.0;
 }
 
-QStringList QualisysSystem::getAvailableObjects() const
-{
-    return m_bodyNames;
-}
-
-SystemCapabilities QualisysSystem::getCapabilities() const
-{
-    return m_capabilities;
-}
-
-QString QualisysSystem::getSystemName() const { return "Qualisys"; }
+QStringList QualisysSystem::getAvailableObjects() const { return m_bodyNames; }
+SystemCapabilities QualisysSystem::getCapabilities() const { return m_capabilities; }
+QString QualisysSystem::getSystemName()    const { return "Qualisys"; }
 QString QualisysSystem::getSystemVersion() const { return m_capabilities.version; }
 
 IMeasurementSystem::ThreadingModel QualisysSystem::getThreadingModel() const
 {
-    // Nous créons et gérons le thread nous-mêmes (contrairement à OptiTrack)
     return ThreadingModel::ApplicationManaged;
 }
 
 void QualisysSystem::cleanup()
 {
     disconnect();
-
-    if (m_rtProtocol) {
-        delete m_rtProtocol;
-        m_rtProtocol = nullptr;
-    }
+    if (m_rtProtocol) { delete m_rtProtocol; m_rtProtocol = nullptr; }
 }

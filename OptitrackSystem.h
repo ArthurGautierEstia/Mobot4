@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifndef OPTITRACKSYSTEM_H
 #define OPTITRACKSYSTEM_H
 
@@ -30,6 +30,7 @@ public:
 
     MeasurementFrame getLatestFrame() const override;
     double getNativeFrequency() const override;
+    double getLatency() const override;              // ✅ manquait → classe abstraite
     QStringList getAvailableObjects() const override;
 
     SystemCapabilities getCapabilities() const override;
@@ -79,12 +80,12 @@ private:
     double m_latency;
     double m_frequency;
     qint64 m_lastFrameTime;    // Timestamp Qt de la dernière frame (µs)
-    int m_frameCount;          // Pour calcul fréquence
+    int    m_frameCount;       // Conservé pour compatibilité (non utilisé dans updateRunningStats)
 
     FILE* m_logFile;
 
     QString m_currentRigidBodyName;
-    int m_currentRigidBodyId;
+    int     m_currentRigidBodyId;
 
     static const ConnectionType kDefaultConnectionType = ConnectionType_Multicast;
 };
