@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>qml;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>qrc;rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
+      <Extensions>ts</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{8b9232af-e22f-4d2d-be07-28a5f9e007ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core">
+      <UniqueIdentifier>{060d2fd4-568e-4544-9d8a-177e2e2cd71b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\measurement_systems">
+      <UniqueIdentifier>{8ab932c8-399a-41ad-a757-537e6b516c66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\measurement_systems\optitrack">
+      <UniqueIdentifier>{6dd0053a-754c-4dbe-8def-bbbff0cf3d47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\measurement_systems\vicon">
+      <UniqueIdentifier>{de84c2f6-eec8-4e02-aed8-c653333b74de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\measurement_systems\qualisys">
+      <UniqueIdentifier>{c588f8ce-2e7d-4b07-9001-d44ba494431e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\measurement_systems\rsi_kuka">
+      <UniqueIdentifier>{e4aea85c-dc1e-4fec-aa51-c70d26ed0849}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ui">
+      <UniqueIdentifier>{79a02c9b-a952-43a6-9ba0-ca29d4c2a394}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ui\widgets">
+      <UniqueIdentifier>{19530c27-f7c6-4256-8ddb-7868dbbbdfb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ui\dialogs">
+      <UniqueIdentifier>{d907c4ee-193f-4037-bec1-ad40f9c144ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\data">
+      <UniqueIdentifier>{f1764547-f89d-4688-b28a-c692c4f83516}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{d6a9def7-8b24-4e04-8959-7258635a1027}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{c28fdef3-d251-4360-b0af-71dfa7d598fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\utils">
+      <UniqueIdentifier>{90165da9-46d5-40bb-881c-3d70b2addab3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\types">
+      <UniqueIdentifier>{ab14b377-5cfb-48e6-9a21-d878288f9ee9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\abstract">
+      <UniqueIdentifier>{c94cd5b3-8d32-4a33-80c3-29eba24a90ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\factories">
+      <UniqueIdentifier>{c794fd01-76ac-49b6-b9db-842969a8cfec}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="MainWindow.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>src\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="CoordinateConverter.cpp">
+      <Filter>src\core\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="IMeasurementSystem.cpp">
+      <Filter>src\core\abstract</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCapabilities.h">
+      <Filter>src\core\types</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemFactory.cpp">
+      <Filter>src\factories</Filter>
+    </ClCompile>
+    <ClCompile Include="OptitrackSystem.cpp">
+      <Filter>src\measurement_systems\optitrack</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="QualisysSystem.cpp">
+      <Filter>src\measurement_systems\qualisys</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="MainWindow.ui">
+      <Filter>src\ui</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="MainWindow.h">
+      <Filter>src\ui</Filter>
+    </QtMoc>
+    <QtMoc Include="OptitrackSystem.h">
+      <Filter>src\measurement_systems\optitrack</Filter>
+    </QtMoc>
+    <QtMoc Include="IMeasurementSystem.h">
+      <Filter>src\core\abstract</Filter>
+    </QtMoc>
+    <QtMoc Include="QualisysSystem.h">
+      <Filter>src\measurement_systems\qualisys</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CircularBuffer.h">
+      <Filter>src\core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="CoordinateConverter.h">
+      <Filter>src\core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MeasurementFrame.h">
+      <Filter>src\core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectionConfig.h">
+      <Filter>src\core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="AcquisitionConfig.h">
+      <Filter>src\core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="PerformanceMetrics.h">
+      <Filter>src\core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemFactory.h">
+      <Filter>src\factories</Filter>
+    </ClInclude>
+    <ClInclude Include="OptitrackConfig.h">
+      <Filter>src\measurement_systems\optitrack</Filter>
+    </ClInclude>
+    <ClInclude Include="QualisysConfig.h">
+      <Filter>src\measurement_systems\qualisys</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
