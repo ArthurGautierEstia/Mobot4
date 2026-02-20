@@ -1,33 +1,34 @@
-#pragma once
+Ôªø#pragma once
 #ifndef MEASUREMENTFRAME_H
 #define MEASUREMENTFRAME_H
 
 #include <QString>
 #include <QtGlobal>
-
+#include <QMap>
+#include <QVector>
 /**
- * @brief Structure reprÈsentant une frame de mesure d'un systËme
+ * @brief Structure repr√©sentant une frame de mesure d'un syst√®me
  *
- * Contient la position (X,Y,Z) et l'orientation (Rx,Ry,Rz) ‡ un instant donnÈ.
- * Les angles sont stockÈs en rx,ry,rz (explicite) et seront mappÈs selon
+ * Contient la position (X,Y,Z) et l'orientation (Rx,Ry,Rz) √† un instant donn√©.
+ * Les angles sont stock√©s en rx,ry,rz (explicite) et seront mapp√©s selon
  * la convention robot choisie lors de l'export.
  */
 struct MeasurementFrame {
     qint64 timestamp;           // Timestamp en microsecondes depuis epoch
-    QString systemName;         // Nom du systËme ("OptiTrack", "Vicon", etc.)
-    QString objectName;         // Nom de l'objet/rigid body trackÈ
+    QString systemName;         // Nom du syst√®me ("OptiTrack", "Vicon", etc.)
+    QString objectName;         // Nom de l'objet/rigid body track√©
 
     // Position (mm)
     double x = 0.0;
     double y = 0.0;
     double z = 0.0;
 
-    // Orientation (degrÈs) - NOMS EXPLICITES
+    // Orientation (degr√©s) - NOMS EXPLICITES
     double rx = 0.0;  // Rotation autour de l'axe X
     double ry = 0.0;  // Rotation autour de l'axe Y
     double rz = 0.0;  // Rotation autour de l'axe Z
 
-    // Quaternion (optionnel, pour interpolation avancÈe)
+    // Quaternion (optionnel, pour interpolation avanc√©e)
     struct Quaternion {
         double w = 1.0;
         double x = 0.0;
@@ -36,12 +37,18 @@ struct MeasurementFrame {
         bool valid = false;
     } quaternion;
 
-    // MÈtadonnÈes
+    // M√©tadonn√©es
     bool isValid = true;        // Frame valide ou perdue/corrompue
-    double quality = 1.0;       // QualitÈ du tracking (0.0 ‡ 1.0)
-    int frameNumber = 0;        // NumÈro de frame du systËme source
+    double quality = 1.0;       // Qualit√© du tracking (0.0 √† 1.0)
+    int frameNumber = 0;        // Num√©ro de frame du syst√®me source
 
-    // Constructeur par dÈfaut
+    // Tags optionnels sp√©cifiques au syst√®me source
+    // Cl√©   : nom du tag (ex: "AIPos", "Log_DtSend", "Krl")
+    // Valeur : liste de doubles (1 valeur pour scalaire, 6 pour vecteur articulaire)
+    // Vide par d√©faut ‚Üí z√©ro overhead pour OptiTrack/Vicon/Qualisys
+    QMap<QString, QVector<double>> extras;
+
+    // Constructeur par d√©faut
     MeasurementFrame() = default;
 
     // Constructeur avec valeurs de base

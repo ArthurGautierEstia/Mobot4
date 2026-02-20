@@ -124,6 +124,24 @@
     <ClCompile Include="XmlNode.cpp">
       <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
     </ClCompile>
+    <ClCompile Include="SystemCardWidget.cpp">
+      <Filter>src\ui\widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="AddSystemDialog.cpp">
+      <Filter>src\ui\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="AcquisitionConfigPanel.cpp">
+      <Filter>src\ui\widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="AcquisitionControlPanel.cpp">
+      <Filter>src\ui\widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="RealTimeTableWidget.cpp">
+      <Filter>src\ui\widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="LogPositionDialog.cpp">
+      <Filter>src\ui\dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="MainWindow.ui">
@@ -145,6 +163,24 @@
     </QtMoc>
     <QtMoc Include="KukaRsiSystem.h">
       <Filter>src\measurement_systems\kukaRSI</Filter>
+    </QtMoc>
+    <QtMoc Include="AddSystemDialog.h">
+      <Filter>src\ui\dialogs</Filter>
+    </QtMoc>
+    <QtMoc Include="SystemCardWidget.h">
+      <Filter>src\ui\widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="AcquisitionConfigPanel.h">
+      <Filter>src\ui\widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="AcquisitionControlPanel.h">
+      <Filter>src\ui\widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="RealTimeTableWidget.h">
+      <Filter>src\ui\widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="LogPositionDialog.h">
+      <Filter>src\ui\dialogs</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

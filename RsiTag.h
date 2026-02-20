@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #ifndef RSITAG_H
 #define RSITAG_H
 
@@ -6,20 +6,20 @@
 #include <QList>
 
 /**
- * @brief Tags RSI disponibles en lecture dans la trame reçue du robot KUKA.
+ * @brief Tags RSI disponibles en lecture dans la trame reÃ§ue du robot KUKA .
  *
- * RIst est toujours parsé (position primaire du MeasurementFrame).
+ * RIst est toujours parsÃ© (position primaire du MeasurementFrame).
  * Les autres sont optionnels, configurables via KukaRsiConfig::selectedTags.
  * Leurs valeurs atterrissent dans MeasurementFrame::extras.
  */
 enum class RsiTag {
-    RIst,            // Toujours parsé — ne pas mettre dans selectedTags
-    RSol,            // Position cartésienne consigne  (X,Y,Z,A,B,C)
-    AIPos,           // Angles articulaires mesurés    (A1–A6)
-    ASPos,           // Angles articulaires consigne   (A1–A6)
-    MACur,           // Couples moteur                 (A1–A6)
-    Delay,           // Délai                          (D)
-    Digin,           // Entrées digitales              (scalaire)
+    RIst,            // Toujours parsÃ© â€” ne pas mettre dans selectedTags
+    RSol,            // Position cartÃ©sienne consigne  (X,Y,Z,A,B,C)
+    AIPos,           // Angles articulaires mesurÃ©s    (A1â€“A6)
+    ASPos,           // Angles articulaires consigne   (A1â€“A6)
+    MACur,           // Couples moteur                 (A1â€“A6)
+    Delay,           // DÃ©lai                          (D)
+    Digin,           // EntrÃ©es digitales              (scalaire)
     Digout,          // Sorties digitales              (scalaire)
     Krl,             // Registre KRL custom            (scalaire)
     Mode,            // Mode custom                    (scalaire)
@@ -30,15 +30,15 @@ enum class RsiTag {
     BlocContinue,
     BlocCancel,
     BlocId,
-    LogDtSend,           // Période trame (ms)
+    LogDtSend,           // PÃ©riode trame (ms)
     LogDurationJob,      // Latence robot (ms)
-    LogTimeToWait,       // Temps avant timeout RSI (µs)
-    LogConnectionStatus  // État connexion (4 = OK)
+    LogTimeToWait,       // Temps avant timeout RSI (Âµs)
+    LogConnectionStatus  // Ã‰tat connexion (4 = OK)
 };
 
 namespace RsiTagMeta {
 
-    /// Clé utilisée dans MeasurementFrame::extras et pour l'affichage UI
+    /// ClÃ© utilisÃ©e dans MeasurementFrame::extras et pour l'affichage UI
     inline QString key(RsiTag tag)
     {
         switch (tag) {
@@ -80,7 +80,7 @@ namespace RsiTagMeta {
         }
     }
 
-    /// Liste de tous les tags optionnels (pour peupler une UI de sélection)
+    /// Liste de tous les tags optionnels (pour peupler une UI de sÃ©lection)
     inline QList<RsiTag> allOptional()
     {
         return {

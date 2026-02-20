@@ -12,6 +12,7 @@
 
 #pragma once
 
+
 // Empêcher windows.h d'inclure <winsock.h> (qui entre en conflit avec <winsock2.h>)
 #ifndef _WINSOCKAPI_
 #define _WINSOCKAPI_
@@ -34,5 +35,5 @@
 
 // ============================================================================
 // Optionnel : libs Winsock à linker automatiquement (si pas en CMake ou autre)
-// #pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "Ws2_32.lib")
 // ============================================================================

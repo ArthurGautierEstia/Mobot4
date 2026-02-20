@@ -66,6 +66,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>C:\Dev\SDK\Eigen;C:\Dev\SDK\NatNetSDK\include;C:\Dev\SDK\DataStream SDK\Win64\CPP;C:\Dev\SDK\qualisys_cpp_sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);NatNetLib.lib;ViconDataStreamSDK_CPP.lib;RTClientSDK.lib</AdditionalDependencies>
@@ -101,12 +102,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AddSystemDialog.cpp" />
+    <ClCompile Include="AcquisitionConfigPanel.cpp" />
+    <ClCompile Include="AcquisitionControlPanel.cpp" />
     <ClCompile Include="KukaRsiSystem.cpp" />
+    <ClCompile Include="LogPositionDialog.cpp" />
     <ClCompile Include="NativeUdpSocket.cpp" />
     <ClCompile Include="OptitrackSystem.cpp" />
     <ClCompile Include="QualisysSystem.cpp" />
+    <ClCompile Include="RealTimeTableWidget.cpp" />
     <ClCompile Include="RsiTrame.cpp" />
     <ClCompile Include="SystemCapabilities.h" />
+    <ClCompile Include="SystemCardWidget.cpp" />
     <ClCompile Include="SystemFactory.cpp" />
     <ClCompile Include="TrameHelper.cpp" />
     <ClCompile Include="XmlNode.cpp" />
@@ -120,13 +127,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AcquisitionConfig.h" />
+    <QtMoc Include="AcquisitionConfigPanel.h" />
     <ClInclude Include="AcquisitionSummary.h" />
+    <QtMoc Include="AddSystemDialog.h" />
+    <QtMoc Include="AcquisitionControlPanel.h" />
     <ClInclude Include="CircularBuffer.h" />
     <ClInclude Include="ConnectionConfig.h" />
     <ClInclude Include="CoordinateConverter.h" />
     <ClInclude Include="KukaRsiConfig.h" />
+    <QtMoc Include="RealTimeTableWidget.h" />
+    <QtMoc Include="LogPositionDialog.h" />
     <ClInclude Include="RsiRobotState.h" />
     <ClInclude Include="RsiTag.h" />
+    <QtMoc Include="SystemCardWidget.h" />
     <ClInclude Include="Trame.h" />
     <ClInclude Include="TrameHelper.h" />
     <ClInclude Include="XmlNode.h" />

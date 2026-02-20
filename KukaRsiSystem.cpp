@@ -19,9 +19,11 @@ KukaRsiSystem::KukaRsiSystem(const KukaRsiConfig& config, QObject* parent)
     : IMeasurementSystem(parent)
     , m_config(config)
 {
-    m_capabilities.supportsLatency = true;
-    m_capabilities.supportsFrequency = true;
-    m_capabilities.nativeFrequencyHz = 250.0;
+    m_capabilities.systemName = QStringLiteral("KUKA RSI");
+    m_capabilities.version = QStringLiteral("3.1");
+    m_capabilities.maxNativeFrequency = 250.0;
+    m_capabilities.minNativeFrequency = 250.0;
+    m_capabilities.typicalLatency = 4.0;   // cycle 4ms
 }
 
 KukaRsiSystem::~KukaRsiSystem()
@@ -271,9 +273,9 @@ bool KukaRsiSystem::parseRobBlock(const char* data, std::size_t len,
     frame.x = rist[0];
     frame.y = rist[1];
     frame.z = rist[2];
-    frame.a = rist[3];
-    frame.b = rist[4];
-    frame.c = rist[5];
+    frame.rz = rist[3];
+    frame.ry = rist[4];
+    frame.rx = rist[5];
 
     // ── Scalaires état robot ──────────────────────────────────────────────────
     auto readInt = [&](const char* open, const char* close, int& out) {
@@ -349,63 +351,60 @@ void KukaRsiSystem::parseOptionalTags(const char* data, std::size_t len,
         const QString key = RsiTagMeta::key(tag);
         switch (tag) {
 
-            // ── Vecteurs 6D — attributs X/Y/Z/A/B/C ──
         case RsiTag::RSol: {
-            const char* wb2 = nullptr, * we2 = nullptr;
-            if (TrameHelper::findOpenTagWindow(data, len, "RSol ", wb2, we2)) {
+            const char* wb = nullptr, * we = nullptr;
+            if (TrameHelper::findOpenTagWindow(data, len, "RSol ", wb, we)) {
                 double v[6] = {};
-                TrameHelper::extractAttrDoubles(wb2, we2, kXYZABC, v, 6);
+                TrameHelper::extractAttrDoubles(wb, we, kXYZABC, v, 6);
                 frame.extras[key] = { v[0], v[1], v[2], v[3], v[4], v[5] };
             }
             break;
         }
 
-                         // ── Vecteurs 6D — attributs A1/A2/.../A6 ──
         case RsiTag::AIPos:
         case RsiTag::ASPos:
         case RsiTag::MACur: {
             const std::string xmlTag = key.toStdString() + " ";
-            const char* wb2 = nullptr, * we2 = nullptr;
-            if (TrameHelper::findOpenTagWindow(data, len, xmlTag.c_str(), wb2, we2)) {
+            const char* wb = nullptr, * we = nullptr;
+            if (TrameHelper::findOpenTagWindow(data, len, xmlTag.c_str(), wb, we)) {
                 double v[6] = {};
-                TrameHelper::extractAttrDoubles(wb2, we2, kA1A6, v, 6);
+                TrameHelper::extractAttrDoubles(wb, we, kA1A6, v, 6);
                 frame.extras[key] = { v[0], v[1], v[2], v[3], v[4], v[5] };
             }
             break;
         }
 
-                          // ── Delay — attribut D ──
         case RsiTag::Delay: {
-            const char* wb2 = nullptr, * we2 = nullptr;
-            if (TrameHelper::findOpenTagWindow(data, len, "Delay ", wb2, we2)) {
+            const char* wb = nullptr, * we = nullptr;
+            if (TrameHelper::findOpenTagWindow(data, len, "Delay ", wb, we)) {
                 static const char* kD[] = { "D" };
                 double v[1] = {};
-                TrameHelper::extractAttrDoubles(wb2, we2, kD, v, 1);
+                TrameHelper::extractAttrDoubles(wb, we, kD, v, 1);
                 frame.extras[key] = { v[0] };
             }
             break;
         }
 
-                          // ── Scalaires déjà parsés dans state → réexposés dans extras ──
-        case RsiTag::Digin:        frame.extras[key] = { static_cast<double>(state.digin) };         break;
-        case RsiTag::Digout:       frame.extras[key] = { static_cast<double>(state.digout) };        break;
-        case RsiTag::Krl:          frame.extras[key] = { static_cast<double>(state.krl) };           break;
-        case RsiTag::Mode:         frame.extras[key] = { static_cast<double>(state.mode) };          break;
-        case RsiTag::BlocSteps:    frame.extras[key] = { static_cast<double>(state.blocSteps) };     break;
-        case RsiTag::BlocStart:    frame.extras[key] = { static_cast<double>(state.blocStart) };     break;
-        case RsiTag::BlocWaiting:  frame.extras[key] = { static_cast<double>(state.blocWaiting) };   break;
-        case RsiTag::BlocEnd:      frame.extras[key] = { static_cast<double>(state.blocEnd) };       break;
-        case RsiTag::BlocContinue: frame.extras[key] = { static_cast<double>(state.blocContinue) };  break;
-        case RsiTag::BlocCancel:   frame.extras[key] = { static_cast<double>(state.blocCancel) };    break;
-        case RsiTag::BlocId:       frame.extras[key] = { static_cast<double>(state.blocId) };        break;
+                          // Scalaires déjà dans state — réexposés dans extras sans re-parser
+        case RsiTag::Digin:        frame.extras[key] = { (double)state.digin };        break;
+        case RsiTag::Digout:       frame.extras[key] = { (double)state.digout };       break;
+        case RsiTag::Krl:          frame.extras[key] = { (double)state.krl };          break;
+        case RsiTag::Mode:         frame.extras[key] = { (double)state.mode };         break;
+        case RsiTag::BlocSteps:    frame.extras[key] = { (double)state.blocSteps };    break;
+        case RsiTag::BlocStart:    frame.extras[key] = { (double)state.blocStart };    break;
+        case RsiTag::BlocWaiting:  frame.extras[key] = { (double)state.blocWaiting };  break;
+        case RsiTag::BlocEnd:      frame.extras[key] = { (double)state.blocEnd };      break;
+        case RsiTag::BlocContinue: frame.extras[key] = { (double)state.blocContinue }; break;
+        case RsiTag::BlocCancel:   frame.extras[key] = { (double)state.blocCancel };   break;
+        case RsiTag::BlocId:       frame.extras[key] = { (double)state.blocId };       break;
 
-            // ── Log RT ──
-        case RsiTag::LogDtSend:          frame.extras[key] = { state.dtSendMs };                              break;
-        case RsiTag::LogDurationJob:     frame.extras[key] = { state.durationJobMs };                         break;
-        case RsiTag::LogTimeToWait:      frame.extras[key] = { state.timeToWaitUs };                          break;
-        case RsiTag::LogConnectionStatus:frame.extras[key] = { static_cast<double>(state.connectionStatus) }; break;
+            // Log RT
+        case RsiTag::LogDtSend:          frame.extras[key] = { state.dtSendMs };                       break;
+        case RsiTag::LogDurationJob:     frame.extras[key] = { state.durationJobMs };                  break;
+        case RsiTag::LogTimeToWait:      frame.extras[key] = { state.timeToWaitUs };                   break;
+        case RsiTag::LogConnectionStatus:frame.extras[key] = { (double)state.connectionStatus };       break;
 
-        case RsiTag::RIst: break; // toujours parsé séparément, pas dans extras
+        case RsiTag::RIst: break;
         default:           break;
         }
     }
