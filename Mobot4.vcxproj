@@ -101,10 +101,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="KukaRsiSystem.cpp" />
+    <ClCompile Include="NativeUdpSocket.cpp" />
     <ClCompile Include="OptitrackSystem.cpp" />
     <ClCompile Include="QualisysSystem.cpp" />
+    <ClCompile Include="RsiTrame.cpp" />
     <ClCompile Include="SystemCapabilities.h" />
     <ClCompile Include="SystemFactory.cpp" />
+    <ClCompile Include="TrameHelper.cpp" />
+    <ClCompile Include="XmlNode.cpp" />
     <QtRcc Include="MainWindow.qrc" />
     <QtUic Include="MainWindow.ui" />
     <QtMoc Include="MainWindow.h" />
@@ -115,16 +120,28 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AcquisitionConfig.h" />
+    <ClInclude Include="AcquisitionSummary.h" />
     <ClInclude Include="CircularBuffer.h" />
     <ClInclude Include="ConnectionConfig.h" />
     <ClInclude Include="CoordinateConverter.h" />
+    <ClInclude Include="KukaRsiConfig.h" />
+    <ClInclude Include="RsiRobotState.h" />
+    <ClInclude Include="RsiTag.h" />
+    <ClInclude Include="Trame.h" />
+    <ClInclude Include="TrameHelper.h" />
+    <ClInclude Include="XmlNode.h" />
     <QtMoc Include="IMeasurementSystem.h" />
+    <ClInclude Include="global_macros.h" />
+    <QtMoc Include="KukaRsiSystem.h" />
     <ClInclude Include="MeasurementFrame.h" />
+    <ClInclude Include="NativeUdpSocket.h" />
     <ClInclude Include="OptitrackConfig.h" />
     <QtMoc Include="OptitrackSystem.h" />
     <ClInclude Include="PerformanceMetrics.h" />
+    <ClInclude Include="platform_windows.h" />
     <ClInclude Include="QualisysConfig.h" />
     <QtMoc Include="QualisysSystem.h" />
+    <ClInclude Include="RsiTrame.h" />
     <ClInclude Include="SystemFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

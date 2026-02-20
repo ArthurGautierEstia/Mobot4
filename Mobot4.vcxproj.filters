@@ -72,6 +72,12 @@
     <Filter Include="src\factories">
       <UniqueIdentifier>{c794fd01-76ac-49b6-b9db-842969a8cfec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\measurement_systems\kukaRSI">
+      <UniqueIdentifier>{68c74138-4974-4e0b-9c1b-3f58a893ba4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\measurement_systems\kukaRSI\RSI Protocol">
+      <UniqueIdentifier>{2059cc7f-d3d7-4621-8677-4e7ba1e55165}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="MainWindow.qrc">
@@ -84,9 +90,6 @@
     </ClCompile>
     <ClCompile Include="CoordinateConverter.cpp">
       <Filter>src\core\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="IMeasurementSystem.cpp">
-      <Filter>src\core\abstract</Filter>
     </ClCompile>
     <ClCompile Include="SystemCapabilities.h">
       <Filter>src\core\types</Filter>
@@ -102,6 +105,24 @@
     </ClCompile>
     <ClCompile Include="QualisysSystem.cpp">
       <Filter>src\measurement_systems\qualisys</Filter>
+    </ClCompile>
+    <ClCompile Include="IMeasurementSystem.cpp">
+      <Filter>src\core\abstract</Filter>
+    </ClCompile>
+    <ClCompile Include="KukaRsiSystem.cpp">
+      <Filter>src\measurement_systems\kukaRSI</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeUdpSocket.cpp">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="RsiTrame.cpp">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="TrameHelper.cpp">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlNode.cpp">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +142,9 @@
     </QtMoc>
     <QtMoc Include="QualisysSystem.h">
       <Filter>src\measurement_systems\qualisys</Filter>
+    </QtMoc>
+    <QtMoc Include="KukaRsiSystem.h">
+      <Filter>src\measurement_systems\kukaRSI</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -150,6 +174,39 @@
     </ClInclude>
     <ClInclude Include="QualisysConfig.h">
       <Filter>src\measurement_systems\qualisys</Filter>
+    </ClInclude>
+    <ClInclude Include="AcquisitionSummary.h">
+      <Filter>src\core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="global_macros.h">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeUdpSocket.h">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_windows.h">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="RsiTrame.h">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Trame.h">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="TrameHelper.h">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlNode.h">
+      <Filter>src\measurement_systems\kukaRSI\RSI Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="RsiRobotState.h">
+      <Filter>src\measurement_systems\kukaRSI</Filter>
+    </ClInclude>
+    <ClInclude Include="RsiTag.h">
+      <Filter>src\measurement_systems\kukaRSI</Filter>
+    </ClInclude>
+    <ClInclude Include="KukaRsiConfig.h">
+      <Filter>src\measurement_systems\kukaRSI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
